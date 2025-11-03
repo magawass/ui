@@ -36,7 +36,7 @@ document.getElementById("resultForm").addEventListener("submit", function(e) {
             table += `<tr><td>${subject}</td><td>${score}</td></tr>`;
           });
 
-          const average = (total / count).toFixed(2);
+          const average = count > 0 ? (total / count).toFixed(2) : "N/A";
           table += `</table><p><strong>Average:</strong> ${average}</p>`;
           container.innerHTML = table;
         }
