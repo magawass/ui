@@ -1,0 +1,351 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magawa Students Portal</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      background-color: #eef6ff;
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background-color: #66b3ff;
+      color: #fff;
+      padding: 20px 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .portal-title {
+      font-size: 2em;
+      margin: 0;
+      font-weight: 700;
+    }
+    main {
+      max-width: 950px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    section {
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+    }
+    section.hidden { display: none; }
+    h2, h3 {
+      text-align: center;
+      color: #007bff;
+    }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 6px; font-weight: 500; }
+    input, select {
+      width: 100%; padding: 10px; border: 1px solid #ccc;
+      border-radius: 5px; font-size: 1em;
+    }
+    button {
+      background-color: #66b3ff; color: white;
+      border: none; padding: 10px 16px;
+      border-radius: 5px; cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover { background-color: #339cff; }
+    .delete-btn {
+      background-color: #ff4d4d; color: #fff;
+      padding: 6px 10px; border-radius: 4px;
+      font-size: 0.9em; border: none;
+    }
+    .delete-btn:hover { background-color: #e63939; }
+    #admin-login-btn {
+      float: right; background-color: #ffd24d;
+      color: #000; font-size: 0.9em;
+    }
+    #result-message, #login-message, #upload-message {
+      margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd; padding: 8px; text-align: left;
+    }
+    th { background-color: #66b3ff; color: white; }
+    footer {
+      text-align: center; padding: 10px;
+      background-color: #66b3ff; color: #fff;
+    }
+    #results-summary {
+      margin-top: 20px; font-weight: 600;
+    }
+    @media (max-width: 768px) {
+      button { width: 100%; margin-bottom: 10px; }
+      #admin-login-btn { float: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1 class="portal-title">MAGAWA STUDENTS PORTAL</h1>
+</header>
+
+<main>
+  <!-- Student Portal -->
+  <section id="student-section">
+    <button id="admin-login-btn">Admin Login</button>
+    <h2>View Your Results</h2>
+    <div class="form-group">
+      <label for="class-select">Select Form:</label>
+      <select id="class-select">
+        <option value="">-- Select a Form --</option>
+        <option value="Form1">Form 1</option>
+        <option value="Form2">Form 2</option>
+        <option value="Form3">Form 3</option>
+        <option value="Form4">Form 4</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="student-number">Student Number:</label>
+      <input type="text" id="student-number" placeholder="Enter your student number" />
+    </div>
+    <button id="view-results-btn">View Results</button>
+    <div id="result-message"></div>
+
+    <div id="results-table-container" class="hidden">
+      <h3>Your Exam Results</h3>
+      <table id="results-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+      <div id="results-summary"></div>
+      <button id="print-btn">Print / Download</button>
+      <button id="back-btn">Back</button>
+    </div>
+  </section>
+
+  <!-- Admin Login -->
+  <section id="admin-login-section" class="hidden">
+    <h2>Admin Login</h2>
+    <div class="form-group">
+      <label for="admin-password">Enter Admin Password:</label>
+      <input type="password" id="admin-password" placeholder="Enter password (Default: admin123)" />
+    </div>
+    <button id="login-btn">Login</button>
+    <button id="back-to-student">Back</button>
+    <div id="login-message"></div>
+  </section>
+
+  <!-- Admin Dashboard -->
+  <section id="admin-dashboard" class="hidden">
+    <h2>Admin Dashboard</h2>
+    <div class="form-group">
+      <label for="upload-class">Select Class:</label>
+      <select id="upload-class">
+        <option value="">-- Select Form --</option>
+        <option value="Form1">Form 1</option>
+        <option value="Form2">Form 2</option>
+        <option value="Form3">Form 3</option>
+        <option value="Form4">Form 4</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="csv-file">Upload Results (CSV):</label>
+      <input type="file" id="csv-file" accept=".csv" />
+    </div>
+    <button id="upload-btn">Upload File</button>
+    <button id="logout-btn">Logout</button>
+    <button id="back-to-portal">Back to Portal</button>
+    <div id="upload-message"></div>
+    <h3>Uploaded Files</h3>
+    <ul id="file-list"></ul>
+  </section>
+</main>
+
+<footer><p>&copy; 2025 Magawa School. All rights reserved.</p></footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const studentSection = document.getElementById("student-section");
+  const adminLoginSection = document.getElementById("admin-login-section");
+  const adminDashboard = document.getElementById("admin-dashboard");
+  const resultsContainer = document.getElementById("results-table-container");
+  const resultsTableHead = document.querySelector("#results-table thead");
+  const resultsTableBody = document.querySelector("#results-table tbody");
+  const resultsSummary = document.getElementById("results-summary");
+
+  const adminLoginBtn = document.getElementById("admin-login-btn");
+  const backToStudentBtn = document.getElementById("back-to-student");
+  const backToPortalBtn = document.getElementById("back-to-portal");
+  const loginBtn = document.getElementById("login-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const uploadBtn = document.getElementById("upload-btn");
+  const backBtn = document.getElementById("back-btn");
+  const printBtn = document.getElementById("print-btn");
+  const resultMessage = document.getElementById("result-message");
+  const uploadMessage = document.getElementById("upload-message");
+  const loginMessage = document.getElementById("login-message");
+  const fileList = document.getElementById("file-list");
+
+  const DEFAULT_PASS = "admin123";
+  let uploadedData = {};
+
+  adminLoginBtn.onclick = () => { studentSection.classList.add("hidden"); adminLoginSection.classList.remove("hidden"); };
+  backToStudentBtn.onclick = () => { adminLoginSection.classList.add("hidden"); studentSection.classList.remove("hidden"); };
+  backToPortalBtn.onclick = () => { adminDashboard.classList.add("hidden"); studentSection.classList.remove("hidden"); };
+  backBtn.onclick = () => { resultsContainer.classList.add("hidden"); resultMessage.innerHTML = ""; };
+  printBtn.onclick = () => window.print();
+
+  loginBtn.onclick = () => {
+    const pass = document.getElementById("admin-password").value.trim();
+    if (pass === DEFAULT_PASS) {
+      loginMessage.innerHTML = '<div class="success">Access granted.</div>';
+      setTimeout(() => {
+        adminLoginSection.classList.add("hidden");
+        adminDashboard.classList.remove("hidden");
+      }, 700);
+    } else loginMessage.innerHTML = '<div class="error">Incorrect password.</div>';
+  };
+
+  logoutBtn.onclick = () => {
+    uploadMessage.innerHTML = '<div class="success">Logged out.</div>';
+    setTimeout(() => {
+      adminDashboard.classList.add("hidden");
+      studentSection.classList.remove("hidden");
+    }, 800);
+  };
+
+  uploadBtn.onclick = () => {
+    const fileInput = document.getElementById("csv-file");
+    const formClass = document.getElementById("upload-class").value;
+    const file = fileInput.files[0];
+    if (!formClass) return uploadMessage.innerHTML = '<div class="error">Select a class first.</div>';
+    if (!file) return uploadMessage.innerHTML = '<div class="error">Select a CSV file.</div>';
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target.result;
+      const rows = text.trim().split("\n").map(r => r.split(","));
+      const headers = rows[0].map(h => h.trim());
+      const data = rows.slice(1).map(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = r[i]?.trim());
+        return obj;
+      });
+      uploadedData[formClass] = { headers, data };
+      renderFileList();
+      uploadMessage.innerHTML = `<div class="success">${file.name} uploaded for ${formClass}.</div>`;
+      fileInput.value = "";
+    };
+    reader.readAsText(file);
+  };
+
+  function renderFileList() {
+    fileList.innerHTML = "";
+    const forms = Object.keys(uploadedData);
+    if (!forms.length) return fileList.innerHTML = "<li>No files uploaded yet.</li>";
+    forms.forEach(form => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${form} results uploaded</span><button class="delete-btn" data-form="${form}">Delete</button>`;
+      fileList.appendChild(li);
+    });
+  }
+
+  fileList.onclick = e => {
+    if (e.target.classList.contains("delete-btn")) {
+      const form = e.target.dataset.form;
+      delete uploadedData[form];
+      renderFileList();
+      uploadMessage.innerHTML = `<div class="success">${form} results deleted.</div>`;
+    }
+  };
+
+  document.getElementById("view-results-btn").onclick = () => {
+    const form = document.getElementById("class-select").value;
+    const studentNumber = document.getElementById("student-number").value.trim();
+    resultsContainer.classList.add("hidden");
+    resultsTableHead.innerHTML = "";
+    resultsTableBody.innerHTML = "";
+    resultsSummary.innerHTML = "";
+    resultMessage.innerHTML = "";
+
+    if (!form || !studentNumber)
+      return resultMessage.innerHTML = '<div class="error">Enter form and student number.</div>';
+    const formData = uploadedData[form];
+    if (!formData)
+      return resultMessage.innerHTML = `<div class="error">No data uploaded for ${form}.</div>`;
+
+    const student = formData.data.find(s => s.StudentNumber === studentNumber);
+    if (!student)
+      return resultMessage.innerHTML = `<div class="error">Student not found in ${form} data.</div>`;
+
+    resultsTableHead.innerHTML = `<tr><th>Subject</th><th>Score</th><th>Grade</th><th>Position per Subject</th><th>Remarks</th><th>Teacher</th></tr>`;
+
+    let scores = [], points = [], passedSubjects = 0;
+
+    for (let i = 0; i < formData.headers.length; i++) {
+      const h = formData.headers[i];
+      if (h.endsWith("Teacher") || h === "Name" || h === "StudentNumber") continue;
+      const teacherCol = formData.headers.find(x => x === `${h}Teacher`);
+      const teacher = teacherCol ? student[teacherCol] || "N/A" : "N/A";
+      const score = parseFloat(student[h]) || 0;
+      let grade, remark, point;
+      if (form === "Form1" || form === "Form2") {
+        if (score >= 80) grade = "A", remark = "Excellent";
+        else if (score >= 65) grade = "B", remark = "Very Good";
+        else if (score >= 55) grade = "C", remark = "Good";
+        else if (score >= 40) grade = "D", remark = "Average";
+        else grade = "F", remark = "Fail";
+        if (score >= 40) passedSubjects++;
+        scores.push(score);
+      } else {
+        if (score >= 80) grade = 1, remark = "Distinction", point = 1;
+        else if (score >= 75) grade = 2, remark = "Distinction", point = 2;
+        else if (score >= 70) grade = 3, remark = "Strong Credit", point = 3;
+        else if (score >= 65) grade = 4, remark = "Strong Credit", point = 4;
+        else if (score >= 60) grade = 5, remark = "Credit", point = 5;
+        else if (score >= 55) grade = 6, remark = "Credit", point = 6;
+        else if (score >= 45) grade = 7, remark = "Pass", point = 7;
+        else if (score >= 35) grade = 8, remark = "Pass", point = 8;
+        else grade = 9, remark = "Fail", point = 9;
+        if (grade <= 8) passedSubjects++;
+        points.push(point);
+      }
+
+      // Calculate position per subject
+      const subjectScores = formData.data.map(s => parseFloat(s[h]) || 0).sort((a,b)=>b-a);
+      const position = subjectScores.indexOf(score) + 1;
+
+      const row = `<tr><td>${h}</td><td>${score}</td><td>${grade}</td><td>${position}</td><td>${remark}</td><td>${teacher}</td></tr>`;
+      resultsTableBody.innerHTML += row;
+    }
+
+    const englishPass = Object.keys(student).some(sub =>
+      sub.toLowerCase().includes("english") && (
+        (form === "Form1" || form === "Form2") ? parseFloat(student[sub]) >= 40 : parseFloat(student[sub]) <= 8
+      )
+    );
+    const passedEnough = passedSubjects >= 6 && englishPass;
+    const finalRemark = passedEnough ? "Pass" : "Fail";
+
+    if (form === "Form1" || form === "Form2") {
+      const avg = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2);
+      resultsSummary.innerHTML = `<p>Average: ${avg}</p><p>Remarks: ${finalRemark}</p>`;
+    } else {
+      const bestSix = points.sort((a,b)=>a-b).slice(0,6);
+      const aggregate = bestSix.reduce((a,b)=>a+b,0);
+      resultsSummary.innerHTML = `<p>Aggregate: ${aggregate}</p><p>Remarks: ${finalRemark}</p>`;
+    }
+
+    resultsContainer.classList.remove("hidden");
+    resultMessage.innerHTML = `<div class="success">Results loaded for ${student.Name} (${student.StudentNumber}).</div>`;
+  };
+});
+</script>
+</body>
+</html>

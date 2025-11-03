@@ -1,0 +1,48 @@
+﻿[
+  {
+    "StudentNumber": "STU001",
+    "Name": "AMON CAROLYN",
+    "AGRICULTURE": "16",
+    "BIOLOGY": "13",
+    "B/KNOWL": "7",
+    "CHEMIST": "20",
+    "CHICHEWA": "28",
+    "ENGLISH": "21",
+    "GEOGRAPHY": "13",
+    "HISTORY": "9",
+    "MATHS": "7",
+    "PHYSICS": "19",
+    "SOC/LIFE": "15"
+  },
+  {
+    "StudentNumber": "STU002",
+    "Name": "BAKALI ALINAFE",
+    "AGRICULTURE": "29",
+    "BIOLOGY": "31",
+    "B/KNOWL": "28",
+    "CHEMIST": "34",
+    "CHICHEWA": "44",
+    "ENGLISH": "34",
+    "GEOGRAPHY": "39",
+    "HISTORY": "15",
+    "MATHS": "15",
+    "PHYSICS": "28",
+    "SOC/LIFE": "36"
+  },
+  {
+    "StudentNumber": "STU003",
+    "Name": "BANDA ANJELLA",
+    "AGRICULTURE": "40",
+    "BIOLOGY": "33",
+    "B/KNOWL": "41",
+    "CHEMIST": "53",
+    "CHICHEWA": "53",
+    "ENGLISH": "35",
+    "GEOGRAPHY": "55",
+    "HISTORY": "24",
+    "MATHS": "30",
+    "PHYSICS": "40",
+    "SOC/LIFE": "N"
+  }
+  // ...continue for all 161 students
+]
