@@ -80,3 +80,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("print-btn").onclick = () => window.print();
 });
+
