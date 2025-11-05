@@ -76,7 +76,6 @@
     function loadResults() {
       const form = document.getElementById("formSelect").value;
       const studentNumber = document.getElementById("studentNumber").value.trim().toUpperCase();
-      // This URL assumes your CSV files are also in the 'main' branch of your 'ui' repository.
       const csvUrl = `https://raw.githubusercontent.com/magawass/ui/main/${form}.csv`;
 
       fetch(csvUrl)
@@ -345,7 +344,7 @@
 
   <!-- Default Page: Class Selection -->
   <div id="classPage" class="page">
-    <!-- Updated src with your GitHub username, repo, and assumed logo file name -->
+    <!-- Updated src with your GitHub username, repo, and confirmed logo file name -->
     <img src="" alt="Magawa Secondary School Logo" class="logo">
     <hr class="logo-line"> <!-- This line will be hidden by CSS on this page -->
     <h1>MAGAWA SECONDARY SCHOOL</h1>
@@ -374,7 +373,7 @@
   <!-- Results Page -->
   <div id="resultPage" class="page">
     <div class="result-header">
-      <!-- Updated src with your GitHub username, repo, and assumed logo file name -->
+      <!-- Updated src with your GitHub username, repo, and confirmed logo file name -->
       <img src="" alt="Magawa Secondary School Logo">
       <div class="school-info">
         <h2>MAGAWA SECONDARY SCHOOL</h2>
