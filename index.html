@@ -3,211 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Magawa Secondary Portal</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script defer>
-    function goToExamPage() {
-      document.getElementById("classPage").style.display = "none";
-      document.getElementById("examPage").style.display = "block";
-    }
-
-    function goBackToClass() {
-      document.getElementById("examPage").style.display = "none";
-      document.getElementById("classPage").style.display = "block";
-    }
-
-    function goBackToExam() {
-      document.getElementById("resultPage").style.display = "none";
-      document.getElementById("examPage").style.display = "block";
-    }
-
-    function goToAdmin() {
-      document.getElementById("resultPage").style.display = "none";
-      document.getElementById("adminPage").style.display = "block";
-    }
-
-    function goBackToResults() {
-      document.getElementById("adminPage").style.display = "none";
-      document.getElementById("resultPage").style.display = "block";
-    }
-
-    function verifyAdmin() {
-      const password = document.getElementById("adminPassword").value;
-      if (password === "magawa123") {
-        document.getElementById("adminPanel").style.display = "block";
-      } else {
-        alert("Incorrect password.");
-      }
-    }
-
-    function uploadCSV() {
-      const fileInput = document.getElementById("csvUpload");
-      const file = fileInput.files[0];
-      const selectedClass = document.getElementById("classDropdown").value;
-
-      if (!file) {
-        alert("Please select a file to upload.");
-        return;
-      }
-      if (!selectedClass) {
-        alert("Please select a class to upload for.");
-        return;
-      }
-
-      alert(`Simulated upload of ${file.name} for ${selectedClass}. Actual upload requires server-side support.`);
-    }
-
-    function deleteCSV() {
-      const filename = document.getElementById("deleteFilename").value.trim();
-      const selectedClass = document.getElementById("classDropdown").value;
-
-      if (!filename) {
-        alert("Please enter a filename to delete.");
-        return;
-      }
-      if (!selectedClass) {
-        alert("Please select a class to delete from.");
-        return;
-      }
-
-      alert(`Simulated deletion of ${filename} from ${selectedClass}. Actual deletion requires server-side support.`);
-    }
-
-    function loadResults() {
-      const form = document.getElementById("formSelect").value;
-      const studentNumber = document.getElementById("studentNumber").value.trim().toUpperCase();
-      const csvUrl = `https://raw.githubusercontent.com/magawass/ui/main/${form}.csv`;
-
-      fetch(csvUrl)
-        .then(response => response.text())
-        .then(csvText => {
-          Papa.parse(csvText, {
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-              const data = results.data;
-              const student = data.find(s => s["Exam Number"] === studentNumber);
-
-              if (!student) {
-                alert("No results found for " + studentNumber);
-                return;
-              }
-
-              document.getElementById("studentName").textContent = student["STUDENT'S NAME"];
-              document.getElementById("studentID").textContent = student["Exam Number"];
-              document.getElementById("studentForm").textContent = form.toUpperCase();
-
-              // Remove previous summary section if it exists
-              const existingSummary = document.getElementById("summarySection");
-              if (existingSummary) {
-                existingSummary.remove();
-              }
-
-              const subjects = Object.keys(student).filter(key => !["Exam Number", "STUDENT'S NAME"].includes(key));
-              let table = `<table>
-                            <tr>
-                                <th>Subject</th>
-                                <th>Score</th>
-                                <th>Grade</th>
-                                <th>Position</th>
-                                <th>Remarks</th>
-                            </tr>`;
-
-              let scores = [];
-              subjects.forEach(subject => {
-                const score = parseFloat(student[subject]);
-                if (!isNaN(score)) {
-                  scores.push({ subject, score });
-                }
-                const grade = getGrade(score);
-                const remark = getRemark(score);
-                table += `<tr><td>${subject}</td><td>${isNaN(score) ? '-' : score}</td><td>${grade}</td><td>-</td><td>${remark}</td></tr>`;
-              });
-              table += `</table>`;
-              document.getElementById("resultsContainer").innerHTML = table;
-
-              // --- New calculations for below the table ---
-              let averageScore = null;
-              let aggregateScore = null;
-              let overallRemark = "";
-
-              // Calculate Average Score (for Form 1 and Form 2)
-              if (form === "form1" || form === "form2") {
-                const numericScores = scores.map(s => s.score);
-                if (numericScores.length > 0) {
-                  averageScore = numericScores.reduce((sum, score) => sum + score, 0) / numericScores.length;
-                }
-                overallRemark = getRemark(averageScore);
-              }
-
-              // Calculate Aggregate Score (best six subjects including English)
-              const englishScore = parseFloat(student["ENGLISH"]);
-              let scoresForAggregate = [...scores]; // Copy existing scores
-              if (!isNaN(englishScore)) {
-                const englishExists = scoresForAggregate.some(s => s.subject === "ENGLISH");
-                if (!englishExists) {
-                  scoresForAggregate.push({ subject: "ENGLISH", score: englishScore });
-                }
-              }
-              scoresForAggregate.sort((a, b) => b.score - a.score);
-              const bestSixScores = scoresForAggregate.slice(0, 6).map(s => s.score);
-              if (bestSixScores.length > 0) {
-                aggregateScore = bestSixScores.reduce((sum, score) => sum + score, 0);
-              }
-              if (form === "form3" || form === "form4") {
-                overallRemark = getRemark(aggregateScore);
-              }
-
-              // Create and append the new summary section
-              const summaryDiv = document.createElement('div');
-              summaryDiv.id = 'summarySection';
-              summaryDiv.innerHTML = `
-                <div class="summary-section">
-                  <table>
-                    <tr>
-                      <th>Average</th>
-                      <td>${(form === "form1" || form === "form2") ? (averageScore !== null ? averageScore.toFixed(2) : '-') : '-'}</td>
-                      <th>Aggregate</th>
-                      <td>${(form === "form3" || form === "form4") ? (aggregateScore !== null ? aggregateScore : '-') : '-'}</td>
-                    </tr>
-                    <tr>
-                      <th>Position</th>
-                      <td>-</td>
-                      <th>Remarks</th>
-                      <td>${overallRemark}</td>
-                    </tr>
-                  </table>
-                </div>
-              `;
-              document.getElementById("resultsContainer").appendChild(summaryDiv);
-
-              document.getElementById("examPage").style.display = "none";
-              document.getElementById("resultPage").style.display = "block";
-            }
-          });
-        });
-    }
-
-    function getGrade(score) {
-      score = parseFloat(score);
-      if (isNaN(score)) return "-";
-      if (score >= 75) return "A";
-      if (score >= 60) return "B";
-      if (score >= 50) return "C";
-      if (score >= 40) return "D";
-      return "F";
-    }
-
-    function getRemark(score) {
-      score = parseFloat(score);
-      if (isNaN(score)) return "-";
-      if (score >= 75) return "Excellent";
-      if (score >= 60) return "Good";
-      if (score >= 50) return "Fair";
-      if (score >= 40) return "Pass";
-      return "Fail";
-    }
-  </script>
   <style>
     body {
       background-color: #d0e7ff;
@@ -228,8 +24,13 @@
       text-align: center;
     }
     .logo {
-      width: 100px;
+      width: 160px;
       margin-top: 20px;
+      display: block;
+    }
+    #classPage .logo {
+      margin-left: auto;
+      margin-right: auto;
     }
     .logo-line {
       border: none;
@@ -245,9 +46,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    .result-header img {
-      width: 60px;
     }
     .school-info {
       text-align: right;
@@ -276,64 +74,34 @@
       margin-top: 20px;
       text-align: center;
     }
-
-    /* Summary section styles */
     .summary-section table {
       margin-top: 10px;
-      background-color: #f0f0f0; /* Light gray background for summary */
-      border-collapse: collapse; /* Ensure proper borders */
+      background-color: #f0f0f0;
+      border-collapse: collapse;
     }
     .summary-section th,
     .summary-section td {
       border: 1px solid #ccc;
-      padding: 8px; /* Slightly more padding for summary */
-      text-align: center; /* Center text in summary cells */
-    }
-    .summary-section th {
-      background-color: #e0e0e0; /* Slightly darker gray for header */
-      width: 15%; /* Adjust width for labels */
-    }
-    .summary-section td {
-      width: 35%; /* Adjust width for values */
-    }
-
-    /* Admin Page Specific Styles */
-    #adminPage h2, #adminPage h3 {
+      padding: 8px;
       text-align: center;
     }
-    #adminPanel input[type="file"],
-    #adminPanel input[type="text"],
-    #adminPanel button {
-      margin-top: 10px;
+    .summary-section th {
+      background-color: #e0e0e0;
+      width: 15%;
     }
-
-    /* Dropdown styles for admin */
-    .admin-dropdown select {
-      padding: 8px;
-      margin-right: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    .summary-section td {
+      width: 35%;
     }
-    .admin-dropdown label {
-      margin-right: 5px;
-    }
-
-    /* Hiding the logo-line on the first page */
-    #classPage .logo-line {
-      display: none;
-    }
-
     @media print {
       body {
         background: white;
       }
-      .actions, #classPage, #adminPage { /* Hide admin page and actions on print */
+      .actions, #classPage, #adminPage {
         display: none;
       }
       #resultPage {
         page-break-after: avoid;
       }
-      /* Ensure logo-line is visible for printing results */
       #resultPage .logo-line {
         display: block;
       }
@@ -342,96 +110,264 @@
 </head>
 <body>
 
-  <!-- Default Page: Class Selection -->
-  <div id="classPage" class="page">
-    <!-- Updated src with your GitHub username, repo, and confirmed logo file name -->
-    <img src="" alt="Magawa Secondary School Logo" class="logo">
-    <hr class="logo-line"> <!-- This line will be hidden by CSS on this page -->
-    <h1>MAGAWA SECONDARY SCHOOL</h1>
-    <h2>EXAM PORTAL</h2>
+<!-- Class Selection Page -->
+<div id="classPage" class="page">
+  <img src="https://raw.githubusercontent.com/magawass/ui/main/logo.png" alt="Magawa Secondary School Logo" class="logo">
+  <hr class="logo-line">
+  <h1>MAGAWA SECONDARY SCHOOL</h1>
+  <h2>EXAM PORTAL</h2>
+  <label for="formSelect">Select Class:</label>
+  <select id="formSelect">
+    <option value="form1">Form 1</option>
+    <option value="form2">Form 2</option>
+    <option value="form3">Form 3</option>
+    <option value="form4">Form 4</option>
+  </select>
+  <br><br>
+  <button onclick="goToExamPage()">View Results</button>
+</div>
 
-    <label for="formSelect">Select Class:</label>
-    <select id="formSelect">
+<!-- Exam Page -->
+<div id="examPage" class="page">
+  <label for="studentNumber">Enter Exam Number:</label>
+  <input type="text" id="studentNumber" placeholder="e.g. STU001" required>
+  <button onclick="loadResults()">View</button>
+  <br><br>
+  <button onclick="goBackToClass()">Back</button>
+</div>
+
+<!-- Results Page -->
+<div id="resultPage" class="page">
+  <div class="result-header">
+    <img src="https://raw.githubusercontent.com/magawass/ui/main/logo.png" alt="Magawa Secondary School Logo" class="logo">
+    <div class="school-info">
+      <h2>MAGAWA SECONDARY SCHOOL</h2>
+      <p>Private Bag 17, Magawa, Mchinji</p>
+    </div>
+  </div>
+  <hr class="logo-line">
+  <h3 class="progress-title">PROGRESS OF RESULTS</h3>
+  <div class="row">
+    <p><strong>Student Name:</strong> <span id="studentName"></span></p>
+    <p><strong>Exam Number:</strong> <span id="studentID"></span></p>
+  </div>
+  <div class="row">
+    <p><strong>Form:</strong> <span id="studentForm"></span></p>
+    <p><strong>Term:</strong> <span id="studentTerm">Term 1</span></p>
+  </div>
+  <div id="resultsContainer"></div>
+  <div class="actions">
+    <button onclick="window.print()">Print</button>
+    <button onclick="downloadAsPDF()">Download PDF</button>
+    <button onclick="goBackToExam()">Back</button>
+    <button onclick="goToAdmin()">Admin</button>
+  </div>
+</div>
+
+<!-- Admin Page -->
+<div id="adminPage" class="page">
+  <h2>Admin Login</h2>
+  <label for="adminPassword">Enter Password:</label>
+  <input type="password" id="adminPassword" placeholder="Admin Password">
+  <button onclick="verifyAdmin()">Login</button>
+  <br><br>
+  <button onclick="goBackToResults()">Back</button>
+  <div id="adminPanel" style="display:none; margin-top:20px;">
+    <h3>File Management</h3>
+    <label for="classDropdown">Select Class:</label>
+    <select id="classDropdown">
+      <option value="">--Select Class--</option>
       <option value="form1">Form 1</option>
       <option value="form2">Form 2</option>
       <option value="form3">Form 3</option>
       <option value="form4">Form 4</option>
     </select>
     <br><br>
-    <button onclick="goToExamPage()">View Results</button>
-  </div>
-
-  <!-- Exam Page -->
-  <div id="examPage" class="page">
-    <label for="studentNumber">Enter Exam Number:</label>
-    <input type="text" id="studentNumber" placeholder="e.g. STU001" required>
-    <button onclick="loadResults()">View</button>
+    <input type="file" id="csvUpload" accept=".csv">
+    <button onclick="uploadCSV()">Upload CSV</button>
     <br><br>
-    <button onclick="goBackToClass()">Back</button>
+    <input type="text" id="deleteFilename" placeholder="e.g. form1.csv">
+    <button onclick="deleteCSV()">Delete CSV</button>
   </div>
+</div>
 
-  <!-- Results Page -->
-  <div id="resultPage" class="page">
-    <div class="result-header">
-      <!-- Updated src with your GitHub username, repo, and confirmed logo file name -->
-      <img src="" alt="Magawa Secondary School Logo">
-      <div class="school-info">
-        <h2>MAGAWA SECONDARY SCHOOL</h2>
-        <p>Private Bag 17, Magawa, Mchinji</p>
-      </div>
-    </div>
-    <hr class="logo-line"> <!-- This line will be visible on this page -->
+<script>
+function goToExamPage() {
+  document.getElementById("classPage").style.display = "none";
+  document.getElementById("examPage").style.display = "block";
+}
+function goBackToClass() {
+  document.getElementById("examPage").style.display = "none";
+  document.getElementById("classPage").style.display = "block";
+}
+function goBackToExam() {
+  document.getElementById("resultPage").style.display = "none";
+  document.getElementById("examPage").style.display = "block";
+}
+function goToAdmin() {
+  document.getElementById("resultPage").style.display = "none";
+  document.getElementById("adminPage").style.display = "block";
+}
+function goBackToResults() {
+  document.getElementById("adminPage").style.display = "none";
+  document.getElementById("resultPage").style.display = "block";
+}
+function verifyAdmin() {
+  const password = document.getElementById("adminPassword").value;
+  if (password === "magawa123") {
+    document.getElementById("adminPanel").style.display = "block";
+  } else {
+    alert("Incorrect password.");
+  }
+}
+function uploadCSV() {
+  const fileInput = document.getElementById("csvUpload");
+  const file = fileInput.files[0];
+  const selectedClass = document.getElementById("classDropdown").value;
+  if (!file || !selectedClass) {
+    alert("Please select a class and file.");
+    return;
+  }
+  alert(`Simulated upload of ${file.name} for ${selectedClass}.`);
+}
+function deleteCSV() {
+  const filename = document.getElementById("deleteFilename").value.trim();
+  const selectedClass = document.getElementById("classDropdown").value;
+  if (!filename || !selectedClass) {
+    alert("Please enter filename and select class.");
+    return;
+  }
+  alert(`Simulated deletion of ${filename} from ${selectedClass}.`);
+}
+function getGrade(score) {
+  score = parseFloat(score);
+  if (isNaN(score)) return "-";
+  if (score >= 75) return "A";
+  if (score >= 60) return "B";
+  if (score >= 50) return "C";
+  if (score >= 40) return "D";
+  return "F";
+}
 
-    <h3 class="progress-title">PROGRESS OF RESULTS</h3>
+function getRemark(score) {
+  score = parseFloat(score);
+  if (isNaN(score)) return "-";
+  if (score >= 75) return "Excellent";
+  if (score >= 60) return "Good";
+  if (score >= 50) return "Fair";
+  if (score >= 40) return "Pass";
+  return "Fail";
+}
 
-    <div class="row">
-      <p><strong>Student Name:</strong> <span id="studentName"></span></p>
-      <p><strong>Exam Number:</strong> <span id="studentID"></span></p>
-    </div>
-    <div class="row">
-      <p><strong>Form:</strong> <span id="studentForm"></span></p>
-      <p><strong>Term:</strong> <span id="studentTerm">Term 1</span></p>
-    </div>
+function loadResults() {
+  const form = document.getElementById("formSelect").value;
+  const studentNumber = document.getElementById("studentNumber").value.trim().toUpperCase();
+  const csvUrl = `https://raw.githubusercontent.com/magawass/ui/main/${form}.csv`;
 
-    <div id="resultsContainer"></div>
+  fetch(csvUrl)
+    .then(response => response.text())
+    .then(csvText => {
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const data = results.data;
+          const student = data.find(s => s["Exam Number"] === studentNumber);
 
-    <div class="actions">
-      <button onclick="window.print()">Print</button>
-      <button onclick="goBackToExam()">Back</button>
-      <button onclick="goToAdmin()">Admin</button>
-    </div>
-  </div>
+          if (!student) {
+            alert("No results found for " + studentNumber);
+            return;
+          }
 
-  <!-- Admin Page -->
-  <div id="adminPage" class="page">
-    <h2>Admin Login</h2>
-    <label for="adminPassword">Enter Password:</label>
-    <input type="password" id="adminPassword" placeholder="Admin Password">
-    <button onclick="verifyAdmin()">Login</button>
-    <br><br>
-    <button onclick="goBackToResults()">Back</button>
+          document.getElementById("studentName").textContent = student["STUDENT'S NAME"];
+          document.getElementById("studentID").textContent = student["Exam Number"];
+          document.getElementById("studentForm").textContent = form.toUpperCase();
 
-    <div id="adminPanel" style="display:none; margin-top:20px;">
-      <h3>File Management</h3>
-      <div class="admin-dropdown">
-        <label for="classDropdown">Select Class:</label>
-        <select id="classDropdown">
-          <option value="">--Select Class--</option>
-          <option value="form1">Form 1</option>
-          <option value="form2">Form 2</option>
-          <option value="form3">Form 3</option>
-          <option value="form4">Form 4</option>
-        </select>
-      </div>
-      <br>
-      <input type="file" id="csvUpload" accept=".csv">
-      <button onclick="uploadCSV()">Upload CSV</button>
+          const existingSummary = document.getElementById("summarySection");
+          if (existingSummary) {
+            existingSummary.remove();
+          }
 
-      <br><br>
-      <input type="text" id="deleteFilename" placeholder="e.g. form1.csv">
-      <button onclick="deleteCSV()">Delete CSV</button>
-    </div>
-  </div>
+          const subjects = Object.keys(student).filter(key => !["Exam Number", "STUDENT'S NAME"].includes(key));
+          let table = `<table><tr><th>Subject</th><th>Score</th><th>Grade</th><th>Position</th><th>Remarks</th></tr>`;
+          let scores = [];
 
+          subjects.forEach(subject => {
+            const score = parseFloat(student[subject]);
+            if (!isNaN(score)) {
+              scores.push({ subject, score });
+            }
+            const grade = getGrade(score);
+            const remark = getRemark(score);
+            table += `<tr><td>${subject}</td><td>${isNaN(score) ? '-' : score}</td><td>${grade}</td><td>-</td><td>${remark}</td></tr>`;
+          });
+
+          table += `</table>`;
+          document.getElementById("resultsContainer").innerHTML = table;
+
+          let averageScore = null;
+          let aggregateScore = null;
+          let overallRemark = "";
+
+          if (form === "form1" || form === "form2") {
+            const numericScores = scores.map(s => s.score);
+            if (numericScores.length > 0) {
+              averageScore = numericScores.reduce((sum, score) => sum + score, 0) / numericScores.length;
+            }
+            overallRemark = getRemark(averageScore);
+          }
+
+          const englishScore = parseFloat(student["ENGLISH"]);
+          let scoresForAggregate = [...scores];
+          if (!isNaN(englishScore)) {
+            const englishExists = scoresForAggregate.some(s => s.subject === "ENGLISH");
+            if (!englishExists) {
+              scoresForAggregate.push({ subject: "ENGLISH", score: englishScore });
+            }
+          }
+
+          scoresForAggregate.sort((a, b) => b.score - a.score);
+          const bestSixScores = scoresForAggregate.slice(0, 6).map(s => s.score);
+          if (bestSixScores.length > 0) {
+            aggregateScore = bestSixScores.reduce((sum, score) => sum + score, 0);
+          }
+
+          if (form === "form3" || form === "form4") {
+            overallRemark = getRemark(aggregateScore);
+          }
+
+          const summaryDiv = document.createElement('div');
+          summaryDiv.id = 'summarySection';
+          summaryDiv.innerHTML = `
+            <div class="summary-section">
+              <table>
+                <tr>
+                  <th>Average</th>
+                  <td>${(form === "form1" || form === "form2") ? (averageScore !== null ? averageScore.toFixed(2) : '-') : '-'}</td>
+                  <th>Aggregate</th>
+                  <td>${(form === "form3" || form === "form4") ? (aggregateScore !== null ? aggregateScore : '-') : '-'}</td>
+                </tr>
+                <tr>
+                  <th>Position</th>
+                  <td>-</td>
+                  <th>Remarks</th>
+                  <td>${overallRemark}</td>
+                </tr>
+              </table>
+            </div>
+          `;
+          document.getElementById("resultsContainer").appendChild(summaryDiv);
+
+          document.getElementById("examPage").style.display = "none";
+          document.getElementById("resultPage").style.display = "block";
+        }
+      });
+    });
+}
+
+function downloadAsPDF() {
+  window.print();
+}
+</script>
 </body>
 </html>
