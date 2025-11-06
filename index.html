@@ -5,6 +5,7 @@
   <title>Magawa Secondary Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
+    * { box-sizing: border-box; }
     body {
       background-color: #d0e7ff;
       font-family: Arial, sans-serif;
@@ -13,24 +14,21 @@
     }
     .page {
       display: none;
+      width: 100%;
       max-width: 800px;
       margin: auto;
       padding: 20px;
       background: white;
       border-radius: 10px;
+      overflow-wrap: break-word;
     }
-    #classPage {
-      display: block;
-      text-align: center;
-    }
+    #classPage { display: block; text-align: center; }
     .logo {
-      width: 160px;
-      margin-top: 20px;
+      width: 100%;
+      max-width: 160px;
+      height: auto;
+      margin: 20px auto;
       display: block;
-    }
-    #classPage .logo {
-      margin-left: auto;
-      margin-right: auto;
     }
     .logo-line {
       border: none;
@@ -39,16 +37,21 @@
     }
     .row {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
+      gap: 10px;
       margin-top: 10px;
     }
     .result-header {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
     .school-info {
       text-align: right;
+      flex: 1;
     }
     .school-info p {
       font-size: 9px;
@@ -59,12 +62,16 @@
       margin-top: 20px;
       text-align: left;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
-    }
+table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 20px auto;
+  font-size: 14px;
+  overflow-x: auto;
+  display: table;
+}
+
     th, td {
       border: 1px solid #ccc;
       padding: 6px;
@@ -74,10 +81,27 @@
       margin-top: 20px;
       text-align: center;
     }
+    .actions button {
+      width: 100%;
+      max-width: 300px;
+      margin: 5px auto;
+      padding: 10px;
+      font-size: 1em;
+    }
+    input, select {
+      width: 100%;
+      max-width: 300px;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 1em;
+      display: block;
+    }
     .summary-section table {
       margin-top: 10px;
       background-color: #f0f0f0;
       border-collapse: collapse;
+      width: 100%;
+      font-size: 0.9em;
     }
     .summary-section th,
     .summary-section td {
@@ -87,24 +111,26 @@
     }
     .summary-section th {
       background-color: #e0e0e0;
-      width: 15%;
+      width: 25%;
     }
     .summary-section td {
-      width: 35%;
+      width: 25%;
     }
     @media print {
-      body {
-        background: white;
+      body { background: white; }
+      .actions, #classPage, #adminPage { display: none; }
+      #resultPage { page-break-after: avoid; }
+      #resultPage .logo-line { display: block; }
+    }
+    @media (max-width: 600px) {
+      .result-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
       }
-      .actions, #classPage, #adminPage {
-        display: none;
-      }
-      #resultPage {
-        page-break-after: avoid;
-      }
-      #resultPage .logo-line {
-        display: block;
-      }
+      .school-info { text-align: center; }
+      .row p { width: 100%; text-align: left; }
+      .progress-title { font-size: 1.2em; text-align: center; }
     }
   </style>
 </head>
@@ -123,7 +149,6 @@
     <option value="form3">Form 3</option>
     <option value="form4">Form 4</option>
   </select>
-  <br><br>
   <button onclick="goToExamPage()">View Results</button>
 </div>
 
@@ -132,7 +157,6 @@
   <label for="studentNumber">Enter Exam Number:</label>
   <input type="text" id="studentNumber" placeholder="e.g. STU001" required>
   <button onclick="loadResults()">View</button>
-  <br><br>
   <button onclick="goBackToClass()">Back</button>
 </div>
 
@@ -170,7 +194,6 @@
   <label for="adminPassword">Enter Password:</label>
   <input type="password" id="adminPassword" placeholder="Admin Password">
   <button onclick="verifyAdmin()">Login</button>
-  <br><br>
   <button onclick="goBackToResults()">Back</button>
   <div id="adminPanel" style="display:none; margin-top:20px;">
     <h3>File Management</h3>
@@ -182,10 +205,8 @@
       <option value="form3">Form 3</option>
       <option value="form4">Form 4</option>
     </select>
-    <br><br>
     <input type="file" id="csvUpload" accept=".csv">
     <button onclick="uploadCSV()">Upload CSV</button>
-    <br><br>
     <input type="text" id="deleteFilename" placeholder="e.g. form1.csv">
     <button onclick="deleteCSV()">Delete CSV</button>
   </div>
@@ -220,6 +241,7 @@ function verifyAdmin() {
     alert("Incorrect password.");
   }
 }
+
 function uploadCSV() {
   const fileInput = document.getElementById("csvUpload");
   const file = fileInput.files[0];
@@ -230,6 +252,7 @@ function uploadCSV() {
   }
   alert(`Simulated upload of ${file.name} for ${selectedClass}.`);
 }
+
 function deleteCSV() {
   const filename = document.getElementById("deleteFilename").value.trim();
   const selectedClass = document.getElementById("classDropdown").value;
@@ -239,6 +262,7 @@ function deleteCSV() {
   }
   alert(`Simulated deletion of ${filename} from ${selectedClass}.`);
 }
+
 function getGrade(score) {
   score = parseFloat(score);
   if (isNaN(score)) return "-";
